@@ -27,6 +27,12 @@ interface MatchAction {
 interface MatchData {
     pbp: MatchAction[]; // Play-by-play data
 }
+// Convertit les secondes en format mm:ss
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes}:${secs.toString().padStart(2, "0")}`;
+};
 
 export default function Home() {
     const [csvGenerated, setCsvGenerated] = useState(false);
@@ -37,87 +43,176 @@ export default function Home() {
     const [modalMessage, setModalMessage] = useState("");
     const [isWaitingModalOpen, setIsWaitingModalOpen] = useState(false);
 
-    const matchLinks: { name: string; url: string }[] = [  
-      { name: "Montbrison", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2713787/bs.html" },
-     { name: "Voiron", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2713784/bs.html" },
-      { name: "Champagne", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2713772/bs.html" },
+   const matchLinks = [
+  { name: "Rice vs North Texas", url: "https://sidearmstats.com/rice/wbball/game.json?detail=full" }
+];
 
-      { name: "Rouen", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2713770/bs.html" },
+    
+const handleGenerate = async () => {
+  const url = "https://sidearmstats.com/rice/wbball/game.json?detail=full";
 
-       { name: "Aulnoye", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2713711/bs.html" },
-    
-      { name: "Montbrison 3", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2648651/bs.html" },
-    
-      { name: "Montbrison 2", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2648647/bs.html" },
-     { name: "Montbrison", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2648643/bs.html" },
-       
-      { name: "Toulouse", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2513460/bs.html" },
+  try {
+    // 🔁 Proxy pour contourner CORS
+    const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+    const response = await fetch(proxyUrl);
+    if (!response.ok) {
+      console.error("Erreur de récupération :", response.status);
+      setModalMessage("Impossible de récupérer les données 😕");
+      setIsModalOpen(true);
+      return;
+    }
+
+    const data = await response.json();
+
+// ✅ Lecture via data.Plays
+const plays = data?.Plays;
+if (!plays || !Array.isArray(plays)) {
+  console.error("Structure inattendue :", data);
+  setModalMessage("Structure inattendue dans le JSON 😕");
+  setIsModalOpen(true);
+  return;
+}
+
+console.log("📊 Nombre total d’actions trouvées :", plays.length);
+console.log("👀 Exemple d’action :", plays[0]);
+
+// 🏀 Filtrage : actions de Trinity Gooden
+const playerName = "Gooden";
+const playerPlays = plays.filter((p) => {
+  const combinedText = `
+    ${p?.Player?.FirstName || ""} 
+    ${p?.Player?.LastName || ""} 
+    ${p?.Narrative || ""} 
+    ${(p?.InvolvedPlayers || [])
+      .map((ip: any) => `${ip.FirstName} ${ip.LastName}`)
+      .join(" ")}
+  `.toLowerCase();
+  return combinedText.includes(playerName.toLowerCase());
+});
+
+console.log(`🎯 Actions trouvées pour ${playerName} : ${playerPlays.length}`);
+console.log(playerPlays.map((p) => p.Narrative));
+
+if (playerPlays.length === 0) {
+  setModalMessage(`Aucune donnée trouvée pour ${playerName} 😅`);
+  setIsModalOpen(true);
+  return;
+}
+
+// 🧾 Formatage et découpe des segments (;)
+const formattedData = playerPlays.flatMap((p) => {
+  const period = p.Period?.toString() ?? "";
+  const chrono =
+    p.ClockDisplay ||
+    (p.ClockSeconds !== undefined ? formatTime(p.ClockSeconds) : "");
+  const score = p.Score
+    ? `${p.Score.HomeTeam ?? ""}-${p.Score.VisitingTeam ?? ""}`
+    : "";
+
+  // Découper les segments séparés par ";"
+  const segments = (p.Narrative || "")
+    .split(";")
+    .map((s: any) => s.trim())
+    .filter(Boolean);
+
+  const rows: string[][] = [];
+
+  segments.forEach((seg: string) => {
+    const segLower = seg.toLowerCase();
+
+    // 🔍 Garde seulement les segments contenant le nom
+    if (!segLower.includes(playerName.toLowerCase())) return;
+
+    // ⛔ Ignore les entrées/sorties
+    if (
+      segLower.includes(" in") ||
+      segLower.includes(" out") ||
+      segLower.startsWith("in ") ||
+      segLower.startsWith("out ")
+    )
+      return;
+
+    // 🎯 Détection du type d'action
+    let type = "Autre";
+    if (segLower.includes("jumper") || segLower.includes("layup") || segLower.includes("hook") || segLower.includes("tip"))
+      type = "2pt";
+    else if (segLower.includes("3pt") || segLower.includes("3-pointer") || segLower.includes("3 ptr"))
+      type = "3pt";
+    else if (segLower.includes("free throw") || segLower.includes("ft"))
+      type = "1pt";
+    else if (segLower.includes("rebound"))
+      type = "rebound";
+    else if (segLower.includes("assist"))
+      type = "assist";
+    else if (segLower.includes("turnover"))
+      type = "turnover";
+    else if (segLower.includes("foul"))
+      type = "foul";
+    else if (segLower.includes("steal"))
+      type = "steal";
+    else if (segLower.includes("block"))
+      type = "block";
+
+    if (type === "Autre") return; // on saute les autres
+
+    // ✅ Gestion des réussites/échecs
+    const success = segLower.includes("good") || segLower.includes("made");
+    const missed = segLower.includes("miss");
+
+    let successFlag = "0";
+    if (type === "assist") {
+      successFlag = "1"; // une assist est toujours réussie
+    } else {
+      successFlag = missed ? "0" : success ? "1" : "0";
+    }
+
+    rows.push([period, chrono, type, successFlag, score]);
+  });
+
+  return rows;
+});
+
+// ❌ Supprime les “Autre” et lignes vides
+const cleanData = formattedData.filter((row) => row && row[2] !== "Autre");
+
+setCsvData(cleanData);
+setCsvGenerated(true);
+
+  } catch (error) {
+    console.error("Erreur dans handleGenerate:", error);
+    setModalMessage("Erreur pendant le chargement des données 😅");
+    setIsModalOpen(true);
+  }
+};
 
 
-      { name: "Pole France", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2513446/bs.html" },
 
-      { name: "Alençon", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2513427/bs.html" },
 
-        { name: "Voiron", url: "https://fibalivestats.dcd.shared.geniussports.com/u/FFBB/2513437/bs.html" },
-    ]; 
+
+
+
+
     
-    const handleGenerate = async () => {
-        const url = selectedLink || customUrl;
-    
-        if (!url) {
-            setModalMessage("Sélectionne un Match 😎");
-            setIsModalOpen(true);
-            return;
-        }
-    
-        try {
-            const jsonUrl = url
-                .replace(/\/u\/FFBB\//, '/data/')
-                .replace(/\/bs\.html\/?/, '/')
-                .replace(/\/$/, '') + '/data.json';
-    
-            console.log("URL JSON générée :", jsonUrl);
-    
-            const proxyUrl = `/api/proxy?url=${encodeURIComponent(jsonUrl)}`;
-            const response = await fetch(proxyUrl);
-    
-            if (!response.ok) {
-                console.error("Erreur de récupération :", response.status, await response.text());
-                setModalMessage("Léna s'échauffe 🏀");
-                setIsWaitingModalOpen(true);
-                return;
-            }
-    
-            const data: MatchData = await response.json();
-            console.log("Données récupérées :", data);
-    
-            const filteredData = data.pbp
-                .filter((action) => action.familyName === "Monasse")
-                .sort((a, b) => b.gt.localeCompare(a.gt));
-    
-            console.log("Actions triées pour Léna :", filteredData);
-    
-            const csvContent = generateCSV(filteredData);
-            console.log("CSV généré :", csvContent);
-    
-            const rows = csvContent.split('\n').slice(1).map((row) => row.split(','));
-            setCsvData(rows);
-            setCsvGenerated(true);
-        } catch (error) {
-            console.error("Erreur dans generateCsv:", error);
-            alert('Une erreur est survenue lors de la génération du CSV.');
-        }
-    };
-    
-    const generateCSV = (data: MatchAction[]): string => {
-        let csv = 'Période,Horodatage,Action,Réussite,Score\n';
-        
-        data.forEach((action) => {
-            csv += `${action.period},${action.gt},${action.actionType},${action.success ? '1' : '0'},${action.s1}-${action.s2}\n`;
-        });
-    
-        return csv;
-    };
+const generateCSV = (data: any[]): string => {
+  let csv = 'Joueuse,Action,Période,Temps,Score\n';
+
+  data.forEach((p) => {
+    const player = `${p.Player.FirstName} ${p.Player.LastName}`;
+    const action = `${p.Action} ${p.Type || ''}`.trim();
+    const period = p.Period;
+    const time = p.ClockSeconds + "s";
+    const score =
+      p.Score
+        ? `${p.Score.HomeTeam}-${p.Score.VisitingTeam}`
+        : "";
+
+    csv += `${player},${action},${period},${time},${score}\n`;
+  });
+
+  return csv;
+};
+
+
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen p-6 sm:p-12 gap-8 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
