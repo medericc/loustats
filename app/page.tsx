@@ -44,7 +44,7 @@ export default function Home() {
     const [isWaitingModalOpen, setIsWaitingModalOpen] = useState(false);
 
    const matchLinks = [
-  { name: "Rice vs North Texas", url: "https://sidearmstats.com/rice/wbball/game.json?detail=full" }
+  { name: "Rice Next Game", url: "https://sidearmstats.com/rice/wbball/game.json?detail=full" }
 ];
 
     
