@@ -3,11 +3,15 @@ import './globals.css';
 export const metadata = {
     title: "Louann LiveStats",
     description: "Les stats détaillées en direct.",
+     manifest: "/manifest.json", 
     icons: {
         icon: "/favicon.ico", // Pour le favicon par défaut
         shortcut: "/favicon.ico", // Pour les navigateurs type iOS
         apple: "/apple-touch-icon.png", // iPhone/iPad
     },
+    other: {
+"apple-mobile-web-app-title": "LouSchedule",
+},
     openGraph: {
       title: "Louann LiveStats",
       description: "Le play by play en direct.",
@@ -35,14 +39,15 @@ export const metadata = {
 
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-      <html lang="fr">
-          <body className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white">
-          <header className="bg-gradient-to-r from-blue-700 to-blue-800 text-white p-8 text-4xl font-extrabold text-center shadow-md">
-    LIVESTATS
+return (
+<html lang="fr">
+
+<body className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white">
+<header className="bg-gradient-to-r from-blue-700 to-blue-800 text-white p-8 text-4xl font-extrabold text-center shadow-md">
+LIVESTATS
 </header>
-              <main className="container mx-auto mt-4">{children}</main>
-          </body>
-      </html>
-  );
+<main className="container mx-auto mt-4">{children}</main>
+</body>
+</html>
+);
 }
