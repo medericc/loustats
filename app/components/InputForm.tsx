@@ -21,7 +21,7 @@ export default function InputForm({
       /> */}
       <Button 
         onClick={onGenerate} 
-        className="bg-red-700 text-gray-100 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-red-900 hover:text-white transition-colors w-full"
+        className="bg-blue-700 text-gray-100 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-900 hover:text-white transition-colors w-full"
       >
         VOIR STATS
       </Button>
