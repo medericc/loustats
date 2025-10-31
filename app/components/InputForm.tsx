@@ -12,16 +12,10 @@ export default function InputForm({
   onGenerate: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-md">
-      {/* <Input
-        type="text"
-        placeholder="Entrez le lien du match (ou laissez vide)"
-        value={value}
-        onChange={onChange}
-      /> */}
+     <div className="flex flex-col items-center gap-4 w-full max-w-md">
       <Button 
         onClick={onGenerate} 
-        className="bg-blue-700 text-gray-100 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-blue-900 hover:text-white transition-colors w-full"
+        className="bg-[#001E5A] text-gray-100 font-bold py-2 px-4 rounded-lg shadow-md hover:bg-[#000C32] hover:text-white transition-colors w-full"
       >
         VOIR STATS
       </Button>

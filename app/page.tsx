@@ -77,7 +77,7 @@ console.log("📊 Nombre total d’actions trouvées :", plays.length);
 console.log("👀 Exemple d’action :", plays[0]);
 
 // 🏀 Filtrage : actions de Trinity Guinn
-const playerName = "Guinn";
+const playerName = "Battiston";
 const playerPlays = plays.filter((p) => {
   const combinedText = `
     ${p?.Player?.FirstName || ""} 
