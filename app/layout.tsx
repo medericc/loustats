@@ -1,5 +1,6 @@
 import './globals.css';
-
+import ServiceWorkerRegister from './ServiceWorkerRegister'; // 👈 ajout du composant client
+import { Analytics } from "@vercel/analytics/react";
 export const metadata = {
     title: "Louann LiveStats",
     description: "Les stats détaillées en direct.",
@@ -47,6 +48,11 @@ return (
 LIVESTATS
 </header>
 <main className="container mx-auto mt-4">{children}</main>
+ {/* Analytics */}
+        <Analytics />
+
+        {/* ✅ Enregistrement du Service Worker */}
+        <ServiceWorkerRegister />
 </body>
 </html>
 );
