@@ -16,11 +16,11 @@ export const metadata = {
     openGraph: {
       title: "Louann LiveStats",
       description: "Le play by play en direct.",
-      url: "https://lou-schedule.vercel.app/",
+      url: "https://lou-livestats.vercel.app/",
       siteName: "Louann Stats",
       images: [
         {
-          url: "https://lou-schedule.vercel.app/preview.jpg", // Mets une image propre ici !
+          url: "https://lou-livestats.vercel.app/preview.jpg", // Mets une image propre ici !
           width: 1200,
           height: 630,
           alt: "LiveStats de Louann",
@@ -32,7 +32,7 @@ export const metadata = {
       card: "summary_large_image", // ✅ Correction ici
       title: "Louann LiveStats",
       description: "Les stats détaillées en direct.",
-      images: ["https://lou-schedule.vercel.app/preview.jpg"], // Même image que Open Graph
+      images: ["https://lou-livestats.vercel.app/preview.jpg"], // Même image que Open Graph
     },
   };
   
