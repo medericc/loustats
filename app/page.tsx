@@ -44,14 +44,27 @@ export default function Home() {
     const [isWaitingModalOpen, setIsWaitingModalOpen] = useState(false);
 
    const matchLinks = [
-      { name: "South Dakota State", url: "" }
+      { name: "South Dakota State", url: "none" }
 ,
   { name: "Mary Hardin-Baylor", url: "https://sidearmstats.com/rice/wbball/game.json?detail=full" }
 ];
 
     
 const handleGenerate = async () => {
-  const url = "https://sidearmstats.com/rice/wbball/game.json?detail=full";
+  // 🧠 Si "none" → on affiche la modale "Patiente"
+  if (selectedLink === "none") {
+    setModalMessage("Louann s’échauffe 🏀");
+    setIsWaitingModalOpen(true);
+
+    // ferme la modale après quelques secondes
+    setTimeout(() => {
+      setIsWaitingModalOpen(false);
+    }, 3000);
+
+    return; // ⛔ on sort sans lancer la récupération
+  }
+
+  const url = selectedLink || customUrl || "https://sidearmstats.com/rice/wbball/game.json?detail=full";
 
   try {
     // 🔁 Proxy pour contourner CORS
@@ -66,126 +79,117 @@ const handleGenerate = async () => {
 
     const data = await response.json();
 
-// ✅ Lecture via data.Plays
-const plays = data?.Plays;
-if (!plays || !Array.isArray(plays)) {
-  console.error("Structure inattendue :", data);
-  setModalMessage("Structure inattendue dans le JSON 😕");
-  setIsModalOpen(true);
-  return;
-}
-
-console.log("📊 Nombre total d’actions trouvées :", plays.length);
-console.log("👀 Exemple d’action :", plays[0]);
-
-// 🏀 Filtrage : actions de Trinity Guinn
-const playerName = "Battiston";
-const playerPlays = plays.filter((p) => {
-  const combinedText = `
-    ${p?.Player?.FirstName || ""} 
-    ${p?.Player?.LastName || ""} 
-    ${p?.Narrative || ""} 
-    ${(p?.InvolvedPlayers || [])
-      .map((ip: any) => `${ip.FirstName} ${ip.LastName}`)
-      .join(" ")}
-  `.toLowerCase();
-  return combinedText.includes(playerName.toLowerCase());
-});
-
-console.log(`🎯 Actions trouvées pour ${playerName} : ${playerPlays.length}`);
-console.log(playerPlays.map((p) => p.Narrative));
-
-if (playerPlays.length === 0) {
-  setModalMessage(`Aucune donnée trouvée pour ${playerName} 😅`);
-  setIsModalOpen(true);
-  return;
-}
-
-// 🧾 Formatage et découpe des segments (;)
-const formattedData = playerPlays.flatMap((p) => {
-  const period = p.Period?.toString() ?? "";
-  const chrono =
-    p.ClockDisplay ||
-    (p.ClockSeconds !== undefined ? formatTime(p.ClockSeconds) : "");
-  const score = p.Score
-    ? `${p.Score.HomeTeam ?? ""}-${p.Score.VisitingTeam ?? ""}`
-    : "";
-
-  // Découper les segments séparés par ";"
-  const segments = (p.Narrative || "")
-    .split(";")
-    .map((s: any) => s.trim())
-    .filter(Boolean);
-
-  const rows: string[][] = [];
-
-  segments.forEach((seg: string) => {
-    const segLower = seg.toLowerCase();
-
-    // 🔍 Garde seulement les segments contenant le nom
-    if (!segLower.includes(playerName.toLowerCase())) return;
-
-    // ⛔ Ignore les entrées/sorties
-    if (
-      segLower.includes(" in") ||
-      segLower.includes(" out") ||
-      segLower.startsWith("in ") ||
-      segLower.startsWith("out ")
-    )
+    // ✅ Lecture via data.Plays
+    const plays = data?.Plays;
+    if (!plays || !Array.isArray(plays)) {
+      console.error("Structure inattendue :", data);
+      setModalMessage("Structure inattendue dans le JSON 😕");
+      setIsModalOpen(true);
       return;
-
-    // 🎯 Détection du type d'action
-    let type = "Autre";
-    if (segLower.includes("jumper") || segLower.includes("layup") || segLower.includes("hook") || segLower.includes("tip"))
-      type = "2pt";
-    else if (segLower.includes("3pt") || segLower.includes("3-pointer") || segLower.includes("3 ptr"))
-      type = "3pt";
-    else if (segLower.includes("free throw") || segLower.includes("ft"))
-      type = "1pt";
-    else if (segLower.includes("rebound"))
-      type = "rebound";
-    else if (segLower.includes("assist"))
-      type = "assist";
-    else if (segLower.includes("turnover"))
-      type = "turnover";
-    else if (segLower.includes("foul"))
-      type = "foul";
-    else if (segLower.includes("steal"))
-      type = "steal";
-    else if (segLower.includes("block"))
-      type = "block";
-
-    if (type === "Autre") return; // on saute les autres
-
-    // ✅ Gestion des réussites/échecs
-    const success = segLower.includes("good") || segLower.includes("made");
-    const missed = segLower.includes("miss");
-
-    let successFlag = "0";
-    if (type === "assist") {
-      successFlag = "1"; // une assist est toujours réussie
-    } else {
-      successFlag = missed ? "0" : success ? "1" : "0";
     }
 
-    rows.push([period, chrono, type, successFlag, score]);
-  });
+    console.log("📊 Nombre total d’actions trouvées :", plays.length);
+    console.log("👀 Exemple d’action :", plays[0]);
 
-  return rows;
-});
+    // 🏀 Filtrage : actions de Battiston
+    const playerName = "Battiston";
+    const playerPlays = plays.filter((p) => {
+      const combinedText = `
+        ${p?.Player?.FirstName || ""} 
+        ${p?.Player?.LastName || ""} 
+        ${p?.Narrative || ""} 
+        ${(p?.InvolvedPlayers || [])
+          .map((ip: any) => `${ip.FirstName} ${ip.LastName}`)
+          .join(" ")}
+      `.toLowerCase();
+      return combinedText.includes(playerName.toLowerCase());
+    });
 
-// ❌ Supprime les “Autre” et lignes vides
-const cleanData = formattedData.filter((row) => row && row[2] !== "Autre");
+    console.log(`🎯 Actions trouvées pour ${playerName} : ${playerPlays.length}`);
+    console.log(playerPlays.map((p) => p.Narrative));
 
-setCsvData(cleanData);
-setCsvGenerated(true);
+    if (playerPlays.length === 0) {
+      setModalMessage(`Aucune donnée trouvée pour ${playerName} 😅`);
+      setIsModalOpen(true);
+      return;
+    }
 
+    // 🧾 Formatage et découpe des segments
+    const formattedData = playerPlays.flatMap((p) => {
+      const period = p.Period?.toString() ?? "";
+      const chrono =
+        p.ClockDisplay ||
+        (p.ClockSeconds !== undefined ? formatTime(p.ClockSeconds) : "");
+      const score = p.Score
+        ? `${p.Score.HomeTeam ?? ""}-${p.Score.VisitingTeam ?? ""}`
+        : "";
+
+      const segments = (p.Narrative || "")
+        .split(";")
+        .map((s: any) => s.trim())
+        .filter(Boolean);
+
+      const rows: string[][] = [];
+
+      segments.forEach((seg: string) => {
+        const segLower = seg.toLowerCase();
+
+        if (!segLower.includes(playerName.toLowerCase())) return;
+
+        if (
+          segLower.includes(" in") ||
+          segLower.includes(" out") ||
+          segLower.startsWith("in ") ||
+          segLower.startsWith("out ")
+        )
+          return;
+
+        let type = "Autre";
+        if (segLower.includes("jumper") || segLower.includes("layup") || segLower.includes("hook") || segLower.includes("tip"))
+          type = "2pt";
+        else if (segLower.includes("3pt") || segLower.includes("3-pointer") || segLower.includes("3 ptr"))
+          type = "3pt";
+        else if (segLower.includes("free throw") || segLower.includes("ft"))
+          type = "1pt";
+        else if (segLower.includes("rebound"))
+          type = "rebound";
+        else if (segLower.includes("assist"))
+          type = "assist";
+        else if (segLower.includes("turnover"))
+          type = "turnover";
+        else if (segLower.includes("foul"))
+          type = "foul";
+        else if (segLower.includes("steal"))
+          type = "steal";
+        else if (segLower.includes("block"))
+          type = "block";
+
+        if (type === "Autre") return;
+
+        const success = segLower.includes("good") || segLower.includes("made");
+        const missed = segLower.includes("miss");
+
+        let successFlag = "0";
+        if (type === "assist") successFlag = "1";
+        else successFlag = missed ? "0" : success ? "1" : "0";
+
+        rows.push([period, chrono, type, successFlag, score]);
+      });
+
+      return rows;
+    });
+
+    const cleanData = formattedData.filter((row) => row && row[2] !== "Autre");
+
+    setCsvData(cleanData);
+    setCsvGenerated(true);
   } catch (error) {
     console.error("Erreur dans handleGenerate:", error);
     setModalMessage("Erreur pendant le chargement des données 😅");
     setIsModalOpen(true);
   }
 };
+
 
 
 
