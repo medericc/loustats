@@ -25,23 +25,29 @@ function decodeStatBroadcast(encoded: string) {
   return atou(tatdsy(cleaned));
 }
 
+const PERIODS = ['1', '2', '3', '4'];
+
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), 'app', 'api', 'proxy', 'cte.txt');
-    const encoded = (await fs.readFile(filePath, 'utf-8')).trim();
-    if (!encoded) throw new Error('cte.txt est vide');
+    let combined = '';
 
-    const decoded = decodeStatBroadcast(encoded);
-
-    try {
-      const json = JSON.parse(decoded);
-      return NextResponse.json(json);
-    } catch {
-      return new NextResponse(decoded, {
-        status: 200,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-      });
+    for (const period of PERIODS) {
+      const filePath = path.join(process.cwd(), 'app', 'api', 'proxy', `cte_q${period}.txt`);
+      try {
+        const encoded = (await fs.readFile(filePath, 'utf-8')).trim();
+        const decoded = decodeStatBroadcast(encoded);
+        combined += decoded + '\n\n'; // on concatène les 4 HTML
+      } catch {
+        console.warn(`Quart ${period} introuvable`);
+      }
     }
+
+    if (!combined.trim()) throw new Error('Aucune période trouvée');
+
+    return new NextResponse(combined, {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    });
   } catch (err: any) {
     console.error('💥 /api/stats error:', err);
     return NextResponse.json({ error: err.message || 'Erreur interne' }, { status: 500 });
