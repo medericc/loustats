@@ -1,3 +1,4 @@
+// app/api/proxy/route.ts
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -9,8 +10,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'game ou data manquant' }, { status: 400 });
     }
 
-    const baseUrl = 'https://stats.statbroadcast.com/interface/webservice/statsdata';
-    const url = `${baseUrl}?game=${encodeURIComponent(game)}&data=${encodeURIComponent(data)}`;
+  const baseUrl = 'https://stats.statbroadcast.com/interface/webservice/stats';
+
+  const url = `${baseUrl}?game=${encodeURIComponent(game)}&data=${encodeURIComponent(data)}`;
 
     const resp = await fetch(url);
     const text = await resp.text();

@@ -10,7 +10,7 @@ export default function Home() {
       const res = await fetch('/api/stats');
       const text = await res.text();
       setRawStats(text);
-
+      console.log(text)
       // Parser le HTML pour récupérer les actions
       const parser = new DOMParser();
       const doc = parser.parseFromString(text, 'text/html');
