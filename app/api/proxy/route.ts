@@ -1,28 +1,27 @@
-// app/api/proxy/route.ts
+export const dynamic = 'force-dynamic'; // Force la route à être dynamique
+
 import { NextResponse } from 'next/server';
 
-export const dynamic = 'force-dynamic';
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const url = searchParams.get('url'); // Récupère l'URL externe depuis les paramètres de requête
 
-export async function POST(request: Request) {
-  try {
-    const { game, data } = await request.json();
-    if (!game || !data) {
-      return NextResponse.json({ error: 'game ou data manquant' }, { status: 400 });
+    if (!url) {
+        return NextResponse.json({ error: 'URL est requise' }, { status: 400 });
     }
 
-  const baseUrl = 'https://stats.statbroadcast.com/interface/webservice/stats';
+    try {
+        // Faites la requête à l'URL externe
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Échec de la récupération des données : ${response.statusText}`);
+        }
 
-  const url = `${baseUrl}?game=${encodeURIComponent(game)}&data=${encodeURIComponent(data)}`;
-
-    const resp = await fetch(url);
-    const text = await resp.text();
-
-    return new NextResponse(text, {
-      status: resp.status,
-      headers: { 'Content-Type': resp.headers.get('Content-Type') || 'text/plain' },
-    });
-  } catch (err: any) {
-    console.error('💥 /api/proxy error:', err);
-    return NextResponse.json({ error: err.message || 'Erreur interne' }, { status: 500 });
-  }
+        // Retournez les données JSON
+        const data = await response.json();
+        return NextResponse.json(data);
+    } catch (error) {
+        console.error('Erreur du proxy :', error);
+        return NextResponse.json({ error: 'Échec de la récupération des données' }, { status: 500 });
+    }
 }
