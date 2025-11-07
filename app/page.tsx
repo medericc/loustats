@@ -2,54 +2,51 @@
 import { useEffect, useState } from 'react';
 
 export default function Home() {
-  const [stats, setStats] = useState<string | object>('');
-  const [proxyResp, setProxyResp] = useState<string>('');
-
-  const fetchProxy = async () => {
-    try {
-      const res = await fetch('/api/proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          game: '553533',
-          data: 'CTEcqvO4oJkhpmcjnUN9Vzu...' // ton cte.txt ou partie du contenu
-        })
-      });
-      const text = await res.text();
-      setProxyResp(text);
-    } catch (err) {
-      console.error(err);
-      setProxyResp('Erreur fetch proxy');
-    }
-  };
+  const [actions, setActions] = useState<string[]>([]);
+  const [rawStats, setRawStats] = useState<string>('');
 
   const fetchStats = async () => {
     try {
       const res = await fetch('/api/stats');
-      if (res.headers.get('Content-Type')?.includes('application/json')) {
-        const json = await res.json();
-        setStats(json);
-      } else {
-        const text = await res.text();
-        setStats(text);
-      }
+      const text = await res.text();
+      setRawStats(text);
+
+      // Parser le HTML pour récupérer les actions
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+
+      // Tous les <tr> des plays
+      const rows = Array.from(doc.querySelectorAll('tr.pxprow'));
+      const inesActions = rows
+        .filter(row => row.textContent?.toLowerCase().includes('ines'))
+        .map(row => row.textContent?.trim() || '');
+
+      setActions(inesActions);
     } catch (err) {
       console.error(err);
-      setStats('Erreur fetch stats');
+      setActions([]);
     }
   };
 
   useEffect(() => {
-    fetchProxy();
     fetchStats();
   }, []);
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>Proxy Response:</h1>
-      <pre>{proxyResp}</pre>
-      <h1>Decoded Stats:</h1>
-      <pre>{typeof stats === 'string' ? stats : JSON.stringify(stats, null, 2)}</pre>
+      <h1>Actions d'Ines Debroise :</h1>
+      {actions.length > 0 ? (
+        <ul>
+          {actions.map((act, i) => (
+            <li key={i}>{act}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>Aucune action trouvée.</p>
+      )}
+
+      <h2>Debug — Stats brutes :</h2>
+      <pre style={{ maxHeight: '300px', overflow: 'auto' }}>{rawStats}</pre>
     </div>
   );
 }
