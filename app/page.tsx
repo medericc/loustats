@@ -46,7 +46,7 @@ export default function Home() {
    const matchLinks = [
        { name: "South Dakota State", url: "https://sidearmstats.com/sdstate/wbball/game.json?detail=full" }
 ,
-  { name: "Mary Hardin-Baylor", url: "https://sidearmstats.com/rice/wbball/game.json?detail=full" }
+  { name: "Mary Hardin-Baylor (Fixé)", url: "/fixed/mary_hardin_baylor.json" }
 ];
 
     
@@ -69,16 +69,20 @@ const handleGenerate = async () => {
   try {
     // 🔁 Proxy pour contourner CORS
     const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
-    const response = await fetch(proxyUrl);
-    if (!response.ok) {
-      console.error("Erreur de récupération :", response.status);
-      setModalMessage("Impossible de récupérer les données 😕");
-      setIsModalOpen(true);
-      return;
-    }
+    let data;
 
-    const data = await response.json();
+if (url.startsWith("/")) {
+  // fichier local → pas besoin de proxy
+  const response = await fetch(url);
+  data = await response.json();
+} else {
+  // lien live → on passe par le proxy
+  const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+  const response = await fetch(proxyUrl);
+  data = await response.json();
+}
 
+  
     // ✅ Lecture via data.Plays
     const plays = data?.Plays;
     if (!plays || !Array.isArray(plays)) {
