@@ -46,7 +46,7 @@ export default function Home() {
    const matchLinks = [
        { name: "South Dakota State", url: "https://sidearmstats.com/sdstate/wbball/game.json?detail=full" }
 ,
-  { name: "Mary Hardin-Baylor (Fixé)", url: "/fixed/mary_hardin_baylor.json" }
+  { name: "Mary Hardin-Baylor", url: "/fixed/mary_hardin_baylor.json" }
 ];
 
     
