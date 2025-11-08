@@ -44,7 +44,7 @@ export default function Home() {
     const [isWaitingModalOpen, setIsWaitingModalOpen] = useState(false);
 
    const matchLinks = [
-       { name: "South Dakota State", url: "https://sidearmstats.com/sdstate/wbball/game.json?detail=full" }
+       { name: "South Dakota State", url: "/fixed/dakota.json" }
 ,
   { name: "Mary Hardin-Baylor", url: "/fixed/mary_hardin_baylor.json" }
 ];
