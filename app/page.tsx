@@ -109,7 +109,7 @@ const handleGenerate = async () => {
   } catch (error) {
     console.error("Erreur dans handleGenerate:", error);
     // 👉 Si erreur réseau ou JSON invalide
-    setModalMessage("Louann s’échauffe 🏀 (erreur ou URL invalide)");
+    setModalMessage("Louann s’échauffe 🏀");
     setIsWaitingModalOpen(true);
     setTimeout(() => setIsWaitingModalOpen(false), 3000);
   }
