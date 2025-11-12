@@ -47,8 +47,8 @@ export default function Home() {
 
 
 
-        { name: "Middle Tennessee", url: "/api/espn?gameId=401825071" }
-,
+//         { name: "Middle Tennessee", url: "/api/espn?gameId=401825071" }
+// ,
       { name: "Houston UH", url: "/api/espn?gameId=401822211" }
 ,
        { name: "South Dakota State", url: "/api/espn?gameId=401825070" }
