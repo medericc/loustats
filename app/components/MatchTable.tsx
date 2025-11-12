@@ -4,12 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 
 interface MatchTableProps {
-  data: string[][]; // CSV data passed as a prop
+  data: string[][];
 }
 
 const actionMapping: Record<string, string> = {
   'foulon': 'Foul On',
-  'rebound': 'Rebound',
+  'rebound': 'Rebond',
   'assist': 'Assist',
   '2pt': 'Tir à 2',
   'turnover': 'Turnover',
@@ -26,13 +26,15 @@ export default function MatchTable({ data }: MatchTableProps) {
       {[1, 2, 3, 4].map((period) => (
         <Card key={period}>
           <CardContent>
-            <h3 className="text-lg font-bold text-center mt-6 mb-3">PÉRIODE {period}</h3>
+            <h3 className="text-lg font-bold text-center mt-6 mb-3">
+              PÉRIODE {period}
+            </h3>
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-center font-bold">Chrono</TableHead>
                   <TableHead className="text-center font-bold">Action</TableHead>
-                  <TableHead className="text-center font-bold">Réussite</TableHead>
+                  <TableHead className="text-center font-bold">Résultat</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -43,18 +45,31 @@ export default function MatchTable({ data }: MatchTableProps) {
                     const action = row[2].toLowerCase();
                     const success = row[3] === '1';
                     const displayAction = actionMapping[action] || row[2];
-                    let status = success ? '✔️' : '❌';
-                    if (['turnover', 'foul'].includes(action)) {
-                      status = success ? '❌' : '✔️';
+
+                    let statusSymbol = '❔';
+                    let statusColor = 'text-gray-500';
+
+                    // 🎯 Logique d’affichage plus naturelle
+                    if (['2pt', '3pt', '1pt', 'assist'].includes(action)) {
+                      // ✅ positif si réussite
+                      statusSymbol = success ? '✔️' : '❌';
+                      statusColor = success ? 'text-green-500' : 'text-red-500';
+                    } else if (['turnover', 'foul'].includes(action)) {
+                      // ❌ toujours négatif
+                      statusSymbol = '❌';
+                      statusColor = 'text-red-500';
+                    } else if (['rebound', 'steal', 'block'].includes(action)) {
+                      // ✅ toujours positif
+                      statusSymbol = '✔️';
+                      statusColor = 'text-green-500';
                     }
+
                     return (
                       <TableRow key={index}>
                         <TableCell className="text-center">{row[1]}</TableCell>
                         <TableCell className="text-center">{displayAction}</TableCell>
-                        <TableCell className="text-center">
-                          <span className={status === '✔️' ? 'text-green-500' : 'text-red-500'}>
-                            {status}
-                          </span>
+                        <TableCell className={`text-center ${statusColor}`}>
+                          {statusSymbol}
                         </TableCell>
                       </TableRow>
                     );
