@@ -47,8 +47,8 @@ export default function Home() {
 
 
 
-//         { name: "Middle Tennessee", url: "/api/espn?gameId=401825071" }
-// ,
+        { name: "Middle Tennessee", url: "/api/espn?gameId=401825071" }
+,
       { name: "Houston UH", url: "/api/espn?gameId=401822211" }
 ,
        { name: "South Dakota State", url: "/api/espn?gameId=401825070" }
@@ -56,55 +56,65 @@ export default function Home() {
 
     
 // 🔁 Fonction principale
-  const handleGenerate = async () => {
-    // Si aucun match choisi
-    if (selectedLink === "none") {
-      setModalMessage("Louann s’échauffe 🏀");
+// 🔁 Fonction principale
+const handleGenerate = async () => {
+  // Si aucun match choisi
+  if (selectedLink === "none") {
+    setModalMessage("Louann s’échauffe 🏀");
+    setIsWaitingModalOpen(true);
+    setTimeout(() => setIsWaitingModalOpen(false), 3000);
+    return;
+  }
+
+  const url = selectedLink || customUrl || "https://sidearmstats.com/rice/wbball/game.json?detail=fu";
+
+  try {
+    let response;
+    if (url.startsWith("/")) {
+      response = await fetch(url); // API interne (pas de CORS)
+    } else {
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+      response = await fetch(proxyUrl);
+    }
+
+    if (!response.ok) {
+      // ⚠️ Cas où la requête échoue (404, 500, etc.)
+      throw new Error(`Erreur HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // 🧩 Accepte à la fois un tableau brut ou data.Plays
+    const plays = Array.isArray(data)
+      ? data
+      : Array.isArray(data?.Plays)
+      ? data.Plays
+      : [];
+
+    if (!plays.length) {
+      console.error("Aucune donnée trouvée :", data);
+      // 👉 Ici on affiche aussi le message “Louann s’échauffe”
+      setModalMessage("Louann s’échauffe 🏀 (aucune action trouvée)");
       setIsWaitingModalOpen(true);
       setTimeout(() => setIsWaitingModalOpen(false), 3000);
       return;
     }
 
-    const url = selectedLink || customUrl || "https://sidearmstats.com/rice/wbball/game.json?detail=full";
+    console.log("✅ Données ESPN récupérées :", plays.length, "actions");
+    console.log("👀 Exemple :", plays[0]);
 
-    try {
-      let response;
-      if (url.startsWith("/")) {
-        response = await fetch(url); // API interne (pas de CORS)
-      } else {
-        const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
-        response = await fetch(proxyUrl);
-      }
+    setCsvData(plays);
+    setCsvGenerated(true);
 
-      const data = await response.json();
+  } catch (error) {
+    console.error("Erreur dans handleGenerate:", error);
+    // 👉 Si erreur réseau ou JSON invalide
+    setModalMessage("Louann s’échauffe 🏀 (erreur ou URL invalide)");
+    setIsWaitingModalOpen(true);
+    setTimeout(() => setIsWaitingModalOpen(false), 3000);
+  }
+};
 
-      // 🧩 Accepte à la fois un tableau brut ou data.Plays
-      const plays = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.Plays)
-        ? data.Plays
-        : [];
-
-      if (!plays.length) {
-        console.error("Aucune donnée trouvée :", data);
-        setModalMessage("Aucune action trouvée dans la réponse ESPN 😕");
-        setIsModalOpen(true);
-        return;
-      }
-
-      console.log("✅ Données ESPN récupérées :", plays.length, "actions");
-      console.log("👀 Exemple :", plays[0]);
-
-      // ✅ Tes données sont déjà au bon format [period, chrono, action, réussite]
-      setCsvData(plays);
-      setCsvGenerated(true);
-
-    } catch (error) {
-      console.error("Erreur dans handleGenerate:", error);
-      setModalMessage("Erreur pendant le chargement des données 😅");
-      setIsModalOpen(true);
-    }
-  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 sm:p-12 gap-8 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
