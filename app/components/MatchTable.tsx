@@ -40,7 +40,7 @@ export default function MatchTable({ data }: MatchTableProps) {
               <TableBody>
                 {data
                   .filter((row) => row[0] === `${period}`)
-                  .filter((row) => row[2] !== 'substitution')
+                  .filter((row) => !['substitution', 'foul', 'foulon'].includes(row[2].toLowerCase()))
                   .map((row, index) => {
                     const action = row[2].toLowerCase();
                     const success = row[3] === '1';
