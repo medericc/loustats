@@ -59,8 +59,8 @@ export async function GET(request: Request) {
         success = "1";
       } else if (isShooter) {
         if (text.includes("three point")) action = "3pt";
-        else if (text.includes("jump shot") || text.includes("layup") || text.includes("hook"))
-          action = "2pt";
+         else if (text.includes("jump shot") || text.includes("layup") || text.includes("jumper") || text.includes("hook"))
+           action = "2pt";
         else if (text.includes("free throw")) action = "1pt";
         else if (text.includes("rebound")) action = "rebound";
         else if (text.includes("turnover")) action = "turnover";
