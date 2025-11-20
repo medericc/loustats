@@ -95,7 +95,7 @@ const handleGenerate = async () => {
     if (!plays.length) {
       console.error("Aucune donnée trouvée :", data);
       // 👉 Ici on affiche aussi le message “Louann s’échauffe”
-      setModalMessage("Louann s’échauffe 🏀 (aucune action trouvée)");
+      setModalMessage("Louann s’échauffe 🏀");
       setIsWaitingModalOpen(true);
       setTimeout(() => setIsWaitingModalOpen(false), 3000);
       return;
