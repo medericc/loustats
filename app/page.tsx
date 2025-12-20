@@ -44,6 +44,8 @@ export default function Home() {
     const [isWaitingModalOpen, setIsWaitingModalOpen] = useState(false);
 
    const matchLinks = [
+     { name: "Lady Rebels", url: "/api/espn?gameId=401820504" } ,
+
     { name: "Lady Rebels", url: "/api/espn?gameId=401825077" } ,
 
 { name: "Sam Houston", url: "/api/espn?gameId=401825076" } ,
