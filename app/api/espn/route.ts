@@ -4,8 +4,8 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const gameId = searchParams.get("gameId") || "401825004"; // par défaut Boston
-  const playerName = (searchParams.get("player") || "Louann Battiston").toLowerCase();
+  const gameId = searchParams.get("gameId") || "401825004";
+  const playerName = (searchParams.get("player") || "Ines Debroise").toLowerCase();
 
   const url = `https://site.web.api.espn.com/apis/site/v2/sports/basketball/womens-college-basketball/summary?event=${gameId}`;
 
@@ -16,13 +16,16 @@ export async function GET(request: Request) {
     }
 
     const json = await response.json();
-    const plays = json?.plays ?? json?.drives?.flatMap((d: any) => d.plays) ?? [];
+    const plays =
+      json?.plays ??
+      json?.drives?.flatMap((d: any) => d.plays) ??
+      [];
 
     if (!Array.isArray(plays) || !plays.length) {
       throw new Error("Aucune donnée 'plays' trouvée dans le flux ESPN");
     }
 
-    // 🎯 Filtre uniquement les actions où le joueur est impliqué
+    // 🎯 Actions impliquant le joueur
     const filteredPlays = plays.filter((p: any) => {
       const text = (p?.text || "").toLowerCase();
       const playerNames = (p?.participants || [])
@@ -36,7 +39,6 @@ export async function GET(request: Request) {
     });
 
     if (!filteredPlays.length) {
-      console.log(`⚠️ Aucune action trouvée pour ${playerName} (${gameId})`);
       return NextResponse.json([]);
     }
 
@@ -49,36 +51,49 @@ export async function GET(request: Request) {
       let action = "other";
       let success = "0";
 
-      const isAssist = text.includes(`assisted by ${playerName}`);
-      const isShooter =
-        text.includes(playerName) &&
-        !isAssist; // 🔹 ne pas compter les passes comme tirs
+      const madeKeywords = ["made", "make", "makes", "good"];
+      const missedKeywords = ["missed", "miss", "misses"];
 
-      if (isAssist) {
-        action = "assist";
-        success = "1";
-      } else if (isShooter) {
-        if (text.includes("three point")) action = "3pt";
-         else if (text.includes("jump shot") || text.includes("layup") || text.includes("jumper") || text.includes("hook"))
-           action = "2pt";
-        else if (text.includes("free throw")) action = "1pt";
-        else if (text.includes("rebound")) action = "rebound";
-        else if (text.includes("turnover")) action = "turnover";
-        else if (text.includes("foul")) action = "foul";
-        else if (text.includes("block")) action = "block";
-        else if (text.includes("steal")) action = "steal";
+     const isAssist =
+  text.includes(`${playerName} assists`) ||
+  text.includes(`assisted by ${playerName}`);
 
-        if (text.includes("made") || text.includes("good")) success = "1";
-        else if (text.includes("missed")) success = "0";
-      }
+const isShooter = text.includes(playerName) && !isAssist;
+
+if (isAssist) {
+  action = "assist";
+  success = "1";
+} else if (isShooter) {
+  if (text.includes("three point")) action = "3pt";
+  else if (
+    text.includes("jump shot") ||
+    text.includes("layup") ||
+    text.includes("jumper") ||
+    text.includes("hook")
+  ) action = "2pt";
+  else if (text.includes("free throw")) action = "1pt";
+  else if (text.includes("rebound")) action = "rebound";
+  else if (text.includes("turnover")) action = "turnover";
+  else if (text.includes("foul")) action = "foul";
+  else if (text.includes("block")) action = "block";
+  else if (text.includes("steal")) action = "steal";
+
+  if (madeKeywords.some(k => text.includes(k))) {
+    success = "1";
+  } else if (missedKeywords.some(k => text.includes(k))) {
+    success = "0";
+  }
+}
+
 
       return [period, chrono, action, success];
     });
 
-    const clean = data.filter((r) => r[2] !== "other");
+    const clean = data.filter(r => r[2] !== "other");
 
     console.log(`✅ ESPN (${gameId}): ${clean.length} actions pour ${playerName}`);
     return NextResponse.json(clean);
+
   } catch (error: any) {
     console.error("Erreur ESPN:", error);
     return NextResponse.json(
