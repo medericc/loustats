@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const gameId = searchParams.get("gameId") || "401825004";
-  const playerName = (searchParams.get("player") || "Ines Debroise").toLowerCase();
+  const playerName = (searchParams.get("player") || "Louann Battiston").toLowerCase();
 
   const url = `https://site.web.api.espn.com/apis/site/v2/sports/basketball/womens-college-basketball/summary?event=${gameId}`;
 
@@ -69,6 +69,7 @@ if (isAssist) {
     text.includes("jump shot") ||
     text.includes("layup") ||
     text.includes("jumper") ||
+        text.includes("jumpshot") ||
     text.includes("hook")
   ) action = "2pt";
   else if (text.includes("free throw")) action = "1pt";
