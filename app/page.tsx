@@ -44,6 +44,11 @@ export default function Home() {
     const [isWaitingModalOpen, setIsWaitingModalOpen] = useState(false);
 
    const matchLinks = [
+
+  // { name: "Tulsa", url: "/api/espn?gameId=401828072" } ,
+
+      { name: "North Texas", url: "/api/espn?gameId=401828067" } ,
+
          { name: "UAB Blazers", url: "/api/espn?gameId=401828062" } ,
 
         { name: "Charlotte 49ers", url: "/api/espn?gameId=401828049" } ,
