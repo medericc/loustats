@@ -45,7 +45,7 @@ export default function Home() {
 
    const matchLinks = [
 
-  // { name: "Tulsa", url: "/api/espn?gameId=401828072" } ,
+  { name: "Tulsa", url: "/api/espn?gameId=401828072" } ,
 
       { name: "North Texas", url: "/api/espn?gameId=401828067" } ,
 
