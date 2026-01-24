@@ -44,6 +44,7 @@ export default function Home() {
     const [isWaitingModalOpen, setIsWaitingModalOpen] = useState(false);
 
    const matchLinks = [
+ { name: "Tulane", url: "/api/espn?gameId=401828078" } ,
 
   { name: "Tulsa", url: "/api/espn?gameId=401828072" } ,
 
@@ -55,9 +56,9 @@ export default function Home() {
 
        { name: "Florida Atlantic", url: "/api/espn?gameId=401828041" } ,
 
-    { name: "South Florida", url: "/api/espn?gameId=401828035" } ,
+    // { name: "South Florida", url: "/api/espn?gameId=401828035" } ,
 
-            { name: "Houston", url: "/api/espn?gameId=401820504" } ,
+    //         { name: "Houston", url: "/api/espn?gameId=401820504" } ,
 
 //      { name: "Grambling", url: "/api/espn?gameId=401825079" } ,
 
