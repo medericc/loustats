@@ -61,41 +61,42 @@ export default function Home() {
 
      { name: "Temple", url: "/api/espn?gameId=401828086" } ,
 
-//  { name: "Tulane", url: "/api/espn?gameId=401828078" } ,
+ { name: "Tulane", url: "/api/espn?gameId=401828078" } ,
 
-//   { name: "Tulsa", url: "/api/espn?gameId=401828072" } ,
+  { name: "Tulsa", url: "/api/espn?gameId=401828072" } ,
 
-      // { name: "North Texas", url: "/api/espn?gameId=401828067" } ,
+      { name: "North Texas", url: "/api/espn?gameId=401828067" } ,
 
-      //    { name: "UAB Blazers", url: "/api/espn?gameId=401828062" } ,
+         { name: "UAB Blazers", url: "/api/espn?gameId=401828062" } ,
 
-      //   { name: "Charlotte 49ers", url: "/api/espn?gameId=401828049" } ,
+        { name: "Charlotte 49ers", url: "/api/espn?gameId=401828049" } ,
 
-      //  { name: "Florida Atlantic", url: "/api/espn?gameId=401828041" } ,
+       { name: "Florida Atlantic", url: "/api/espn?gameId=401828041" } ,
 
-    // { name: "South Florida", url: "/api/espn?gameId=401828035" } ,
+    { name: "South Florida", url: "/api/espn?gameId=401828035" } ,
 
-    //         { name: "Houston", url: "/api/espn?gameId=401820504" } ,
+            { name: "Houston", url: "/api/espn?gameId=401820504" } ,
 
-//      { name: "Grambling", url: "/api/espn?gameId=401825079" } ,
+     { name: "Grambling", url: "/api/espn?gameId=401825079" } ,
 
-//      { name: "Arlington", url: "/api/espn?gameId=401825078" } ,
+     { name: "Arlington", url: "/api/espn?gameId=401825078" } ,
 
-//     { name: "Lady Rebels", url: "/api/espn?gameId=401825077" } ,
+    { name: "Lady Rebels", url: "/api/espn?gameId=401825077" } ,
 
-// { name: "Sam Houston", url: "/api/espn?gameId=401825076" } ,
-// { name: "UCF Knights", url: "/api/espn?gameId=401825075" } ,
-// { name: "Morgan State", url: "/api/espn?gameId=401825074" } ,
-//     { name: "Illinois St", url: "/api/espn?gameId=401825073" } ,
-// { name: "Incarnate Word", url: "/api/espn?gameId=401809052" } ,
-//       { name: "Princeton", url: "/api/espn?gameId=401827784" }
-// ,
+{ name: "Sam Houston", url: "/api/espn?gameId=401825076" } ,
+{ name: "UCF Knights", url: "/api/espn?gameId=401825075" } ,
+{ name: "Morgan State", url: "/api/espn?gameId=401825074" } ,
+    { name: "Illinois St", url: "/api/espn?gameId=401825073" } ,
+{ name: "Incarnate Word", url: "/api/espn?gameId=401809052" } ,
+      { name: "Princeton", url: "/api/espn?gameId=401827784" }
+,
 
-//         { name: "Middle Tennessee", url: "/api/espn?gameId=401825071" }
-// ,
-//       { name: "Houston UH", url: "/api/espn?gameId=401822211" }
-// ,
-//        { name: "South Dakota State", url: "/api/espn?gameId=401825070" }
+        { name: "Middle Tennessee", url: "/api/espn?gameId=401825071" }
+,
+      { name: "Houston UH", url: "/api/espn?gameId=401822211" }
+,
+       { name: "South Dakota State", url: "/api/espn?gameId=401825070" }
+
 ];
 
     
